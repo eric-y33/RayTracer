@@ -7,25 +7,26 @@
 // "In graphics, the algebra almost always relates very directly to the geometry."
 double hit_sphere(const point3& center, double radius, const ray& r) {
 	vec3 oc = center - r.origin();
-	auto a = dot(r.direction(), r.direction());
-	auto b = -2.0 * dot(r.direction(), oc);
-	auto c = dot(oc, oc) - radius * radius;
-	auto discriminant = b * b - 4 * a * c;
+	auto a = r.direction().length_squared();
+	auto h = dot(r.direction(), oc);
+	auto c = oc.length_squared() - radius*radius;
+	auto discriminant = h*h - a*c;
 	
 	if (discriminant < 0) {
 		return -1.0;
 	} else {
-		return (-b - std::sqrt(discriminant)) / (2.0 * a);
+		return (h - std::sqrt(discriminant))/a;
 	}
 }
 
 color ray_color(const ray& r) {
-	auto t = hit_sphere(point3(0, 0, -1), 0.5, r);
+	auto t = hit_sphere(point3(0, 0, -0.8), 0.5, r);
 	if (t > 0.0) {
-		vec3 N = unit_vector(r.at(t) - vec3(0, 0, -1));
+		vec3 N = unit_vector(r.at(t) - vec3(0, 0, -0.8));
 		return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
 	}
 
+	// Sky background
 	vec3 unit_direction = unit_vector(r.direction());
 	auto a = 0.5 * (unit_direction.y() + 1.0);
 	return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
